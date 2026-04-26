@@ -16,7 +16,7 @@ class FileApiService {
   async getUploadUrl(
     fileName: string,
     fileType: string,
-    fileSize: number
+    fileSize: number,
   ): Promise<UploadUrlResponse> {
     const response = await axiosInstance.post<ApiResponse<UploadUrlResponse>>(
       "/files/get-upload-url",
@@ -24,7 +24,7 @@ class FileApiService {
         fileName,
         fileType,
         fileSize,
-      }
+      },
     );
 
     if (!response.data.success || !response.data.data) {
@@ -39,8 +39,8 @@ class FileApiService {
    */
   async uploadToCloudinary(
     file: File,
-    uploadData: UploadUrlResponse
-  ): Promise<string> {
+    uploadData: UploadUrlResponse,
+  ): Promise<{ secureUrl: string; resourceType: string }> {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("api_key", uploadData.apiKey);
@@ -58,7 +58,7 @@ class FileApiService {
       onUploadProgress: (progressEvent) => {
         if (progressEvent.total) {
           const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
+            (progressEvent.loaded * 100) / progressEvent.total,
           );
           console.log(`Upload progress: ${percentCompleted}%`);
         }
@@ -69,7 +69,10 @@ class FileApiService {
       throw new Error("Failed to upload file to Cloudinary");
     }
 
-    return response.data.secure_url;
+    return {
+      secureUrl: response.data.secure_url,
+      resourceType: response.data.resource_type,
+    };
   }
 
   /**
@@ -78,7 +81,7 @@ class FileApiService {
   async confirmUpload(
     cloudinaryUrl: string,
     file: File,
-    options: FileUploadOptions
+    options: FileUploadOptions,
   ): Promise<UploadConfirmResponse> {
     const response = await axiosInstance.post<
       ApiResponse<UploadConfirmResponse>
@@ -103,7 +106,7 @@ class FileApiService {
   async uploadFile(
     file: File,
     options: FileUploadOptions,
-    onProgress?: (progress: number) => void
+    onProgress?: (progress: number) => void,
   ): Promise<UploadConfirmResponse> {
     try {
       // Step 1: Get upload URL
@@ -111,17 +114,23 @@ class FileApiService {
       const uploadData = await this.getUploadUrl(
         file.name,
         file.type,
-        file.size
+        file.size,
       );
 
       // Step 2: Upload to Cloudinary
       onProgress?.(30);
-      const cloudinaryUrl = await this.uploadToCloudinary(file, uploadData);
+      const { secureUrl, resourceType } = await this.uploadToCloudinary(
+        file,
+        uploadData,
+      );
 
       // Step 3: Confirm with backend
       onProgress?.(80);
       console.log("debug-options", options);
-      const result = await this.confirmUpload(cloudinaryUrl, file, options);
+      const result = await this.confirmUpload(secureUrl, file, {
+        resourceType,
+        ...options,
+      });
 
       onProgress?.(100);
       return result;
@@ -135,7 +144,7 @@ class FileApiService {
    */
   async getFileInfo(code: string): Promise<FileInfo> {
     const response = await axiosInstance.get<ApiResponse<FileInfo>>(
-      `/files/file/${code}`
+      `/files/file/${code}`,
     );
 
     if (!response.data.success || !response.data.data) {
@@ -154,7 +163,7 @@ class FileApiService {
       {
         code,
         password,
-      }
+      },
     );
 
     if (!response.data.success || !response.data.data) {
@@ -169,7 +178,7 @@ class FileApiService {
    */
   async deleteFile(fileId: string): Promise<void> {
     const response = await axiosInstance.delete<ApiResponse>(
-      `/files/file/${fileId}`
+      `/files/file/${fileId}`,
     );
 
     if (!response.data.success) {

@@ -10,6 +10,7 @@ export interface FileUploadOptions {
   downloads: number;
   usePassword: boolean;
   password?: string;
+  resourceType?: string;
 }
 
 export interface UploadUrlResponse {
