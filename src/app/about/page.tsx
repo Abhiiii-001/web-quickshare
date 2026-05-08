@@ -3,6 +3,7 @@
 import Navbar from '../_components/NavBar';
 import AuroraBackground from '../_components/AuroraBackground';
 import { Github, Linkedin, Mail, ExternalLink, User, Code } from 'lucide-react';
+import Image from 'next/image';
 
 export default function AboutPage() {
   return (
