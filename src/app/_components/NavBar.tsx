@@ -11,18 +11,18 @@ export default function Navbar() {
             ⚡
           </div>
           <span className="text-xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-            QuickShare
+            RapidShare
           </span>
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
-          <Link href="#features" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
+          <Link href="/features" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
             Features
           </Link>
-          <Link href="#pricing" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
-            Pricing
+          <Link href="/security" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
+            Security
           </Link>
-          <Link href="#about" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
+          <Link href="/about" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
             About
           </Link>
         </div>

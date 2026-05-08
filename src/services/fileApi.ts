@@ -9,6 +9,12 @@ import {
   DownloadResponse,
 } from "@/types/api";
 
+export interface PreUploadResult {
+  secureUrl: string;
+  resourceType: string;
+  publicId: string;
+}
+
 class FileApiService {
   /**
    * Step 1: Get signed upload URL from backend
@@ -40,7 +46,8 @@ class FileApiService {
   async uploadToCloudinary(
     file: File,
     uploadData: UploadUrlResponse,
-  ): Promise<{ secureUrl: string; resourceType: string }> {
+    onProgress?: (progress: number) => void,
+  ): Promise<PreUploadResult> {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("api_key", uploadData.apiKey);
@@ -48,7 +55,6 @@ class FileApiService {
     formData.append("signature", uploadData.signature);
     formData.append("public_id", uploadData.publicId);
     formData.append("folder", uploadData.folder);
-    // formData.append("resource_type", "auto");
 
     // Direct upload to Cloudinary (no interceptors)
     const response = await axios.post(uploadData.uploadUrl, formData, {
@@ -60,7 +66,7 @@ class FileApiService {
           const percentCompleted = Math.round(
             (progressEvent.loaded * 100) / progressEvent.total,
           );
-          console.log(`Upload progress: ${percentCompleted}%`);
+          onProgress?.(percentCompleted);
         }
       },
     });
@@ -72,11 +78,36 @@ class FileApiService {
     return {
       secureUrl: response.data.secure_url,
       resourceType: response.data.resource_type,
+      publicId: response.data.public_id,
     };
   }
 
   /**
-   * Step 3: Confirm upload with backend
+   * Pre-upload: Get signed URL + upload to Cloudinary temp folder (Steps 1+2)
+   * Called immediately when user selects a file for eager uploading.
+   */
+  async preUpload(
+    file: File,
+    onProgress?: (progress: number) => void,
+  ): Promise<PreUploadResult> {
+    // Step 1: Get signed upload URL
+    onProgress?.(5);
+    const uploadData = await this.getUploadUrl(file.name, file.type, file.size);
+
+    // Step 2: Upload to Cloudinary temp folder
+    onProgress?.(10);
+    const result = await this.uploadToCloudinary(file, uploadData, (cloudinaryProgress) => {
+      // Map cloudinary progress (0-100) to overall progress (10-95)
+      const mapped = 10 + Math.round(cloudinaryProgress * 0.85);
+      onProgress?.(mapped);
+    });
+
+    onProgress?.(100);
+    return result;
+  }
+
+  /**
+   * Step 3: Confirm upload with backend (move temp → permanent + generate code)
    */
   async confirmUpload(
     cloudinaryUrl: string,
@@ -101,35 +132,47 @@ class FileApiService {
   }
 
   /**
-   * Complete upload flow
+   * Complete upload flow (fallback when no pre-upload was done)
    */
   async uploadFile(
     file: File,
     options: FileUploadOptions,
     onProgress?: (progress: number) => void,
+    preUploadData?: PreUploadResult,
   ): Promise<UploadConfirmResponse> {
     try {
-      // Step 1: Get upload URL
-      onProgress?.(10);
-      const uploadData = await this.getUploadUrl(
-        file.name,
-        file.type,
-        file.size,
-      );
+      let secureUrl: string;
+      let resourceType: string;
+      let publicId: string;
 
-      // Step 2: Upload to Cloudinary
-      onProgress?.(30);
-      const { secureUrl, resourceType } = await this.uploadToCloudinary(
-        file,
-        uploadData,
-      );
+      if (preUploadData) {
+        // Pre-upload already done — skip steps 1+2
+        secureUrl = preUploadData.secureUrl;
+        resourceType = preUploadData.resourceType;
+        publicId = preUploadData.publicId;
+        onProgress?.(80);
+      } else {
+        // Fallback: full 3-step flow
+        onProgress?.(10);
+        const uploadData = await this.getUploadUrl(
+          file.name,
+          file.type,
+          file.size,
+        );
+
+        onProgress?.(30);
+        const result = await this.uploadToCloudinary(file, uploadData);
+        secureUrl = result.secureUrl;
+        resourceType = result.resourceType;
+        publicId = result.publicId;
+        onProgress?.(80);
+      }
 
       // Step 3: Confirm with backend
-      onProgress?.(80);
-      console.log("debug-options", options);
       const result = await this.confirmUpload(secureUrl, file, {
-        resourceType,
         ...options,
+        resourceType,
+        tempPublicId: publicId,
       });
 
       onProgress?.(100);

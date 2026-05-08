@@ -18,9 +18,9 @@ const shareTechMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "QuickShare - Instant File Sharing",
+  title: "RapidShare - Instant File Sharing",
   description:
-    "Share files instantly with QuickShare. Generate a unique code, share anywhere. No login required.",
+    "Share files instantly with RapidShare. Generate a unique code, share anywhere. No login required.",
   keywords: ["file sharing", "send files", "file transfer", "secure sharing"],
 };
 

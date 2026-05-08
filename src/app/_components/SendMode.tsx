@@ -1,19 +1,21 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lock, Clock, Hash } from "lucide-react";
+import { Lock, Clock, Hash, CheckCircle, Loader2 } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { sendFileSchema } from "@/libs/validation";
-import { formatFileSize, generateShareCode } from "@/libs/utils";
-// import { useToast } from '@/hooks/useToast';
+import { formatFileSize } from "@/libs/utils";
 import { FileUploadData } from "@/types";
 import { CommonConstants } from "@/constants";
 import { toast } from "react-toastify";
-import { useAppDispatch } from "@/store/hooks";
-import { setSelectedFile, uploadFile } from "@/store/slices/fileSlice";
-import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  setSelectedFile,
+  uploadFile,
+  preUploadFile,
+  resetPreUpload,
+} from "@/store/slices/fileSlice";
 
 interface SendModeProps {
   onCodeGenerated: (code: string) => void;
@@ -21,9 +23,16 @@ interface SendModeProps {
 
 export default function SendMode({ onCodeGenerated }: SendModeProps) {
   const dispatch = useAppDispatch();
-  const { selectedFile, uploadProgress, isUploading, error } = useAppSelector(
-    (state) => state.file
-  );
+  const {
+    selectedFile,
+    uploadProgress,
+    isUploading,
+    error,
+    isPreUploading,
+    preUploadProgress,
+    preUploadData,
+    preUploadError,
+  } = useAppSelector((state) => state.file);
 
   const {
     register,
@@ -44,8 +53,18 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
       if (acceptedFiles.length > 0) {
-        dispatch(setSelectedFile(acceptedFiles[0]));
-        toast.success("File selected successfully");
+        const file = acceptedFiles[0];
+
+        // Clear previous pre-upload if selecting a different file
+        if (selectedFile) {
+          dispatch(resetPreUpload());
+        }
+
+        dispatch(setSelectedFile(file));
+        toast.success("File selected — uploading in background...");
+
+        // Start eager upload immediately
+        dispatch(preUploadFile(file));
       }
     },
     maxSize: 100 * 1024 * 1024,
@@ -54,12 +73,19 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
 
   const onSubmit = async (data: FileUploadData) => {
     if (!selectedFile) {
-      //   addToast('Please select a file first', 'error');
       toast.error("Please select a file first");
       return;
     }
 
-    console.log("debug-form", data);
+    if (isPreUploading) {
+      toast.info("File is still uploading, please wait...");
+      return;
+    }
+
+    if (preUploadError) {
+      toast.error("Pre-upload failed. Please re-select your file.");
+      return;
+    }
 
     try {
       const result = await dispatch(
@@ -70,6 +96,15 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
     } catch (error: any) {
       toast.error("Upload failed!");
     }
+  };
+
+  // Determine submit button state and text
+  const isSubmitDisabled = !selectedFile || isUploading || isPreUploading;
+  const getButtonText = () => {
+    if (isPreUploading) return "Uploading file...";
+    if (isUploading) return "Generating code...";
+    if (preUploadData) return "Share File ⚡";
+    return "Upload";
   };
 
   return (
@@ -103,9 +138,37 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
       </div>
 
       {selectedFile && (
-        <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-3 text-sm text-cyan-900">
-          <strong>📎</strong> {selectedFile.name} (
-          {formatFileSize(selectedFile.size)})
+        <div 
+          className="bg-white border border-indigo-500/20 rounded-2xl p-4 space-y-3 text-gray-900"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-500 shrink-0">
+                <CheckCircle className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-black truncate text-foreground/80 uppercase tracking-tight">
+                  {selectedFile.name}
+                </p>
+                <p className="text-[10px] text-foreground/40 font-bold">
+                  {formatFileSize(selectedFile.size)}
+                </p>
+              </div>
+            </div>
+            {isPreUploading && (
+              <Loader2 className="w-4 h-4 text-indigo-500 animate-spin shrink-0" />
+            )}
+          </div>
+
+          {(isPreUploading || preUploadData) && (
+            <div className="w-full bg-black/5 dark:bg-white/5 rounded-full h-1 overflow-hidden">
+              <div
+                className={`h-full rounded-full ${
+                  preUploadData ? "bg-green-500" : "bg-indigo-500"
+                }`}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -119,7 +182,7 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
             <select
               {...register("expiry")}
               defaultValue={CommonConstants.EXPORIED_DURATION_LIST[0].value}
-              className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
+              className="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
             >
               {CommonConstants.EXPORIED_DURATION_LIST.map((item, index) => (
                 <option value={item.value} key={`duration-${index}`}>
@@ -137,7 +200,7 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
             <input
               type="number"
               {...register("downloads", { valueAsNumber: true })}
-              className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
+              className="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
               min={CommonConstants.DOWNLOAD_LIMIT.MIN}
               max={CommonConstants.DOWNLOAD_LIMIT.MAX}
             />
@@ -168,7 +231,7 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
               type="password"
               {...register("password")}
               placeholder="Set a password"
-              className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
+              className="w-full bg-white text-gray-900 placeholder:text-gray-400 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
             />
             {errors.password && (
               <p className="text-xs text-red-500 mt-1">
@@ -181,11 +244,20 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
 
       <button
         type="submit"
-        disabled={!selectedFile || isUploading}
-        className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3.5 px-6 rounded-xl uppercase tracking-wider text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+        disabled={isSubmitDisabled}
+        className={`w-full font-black py-4 px-6 rounded-2xl uppercase tracking-[0.2em] text-[10px] shadow-2xl transition-all active:scale-95 disabled:opacity-30 disabled:grayscale ${
+          preUploadData && !isUploading
+            ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+            : "bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+        }`}
       >
-        {isUploading ? "Uploading..." : "Upload"}
+        {isUploading ? (
+          <Loader2 className="w-4 h-4 inline mr-2 animate-spin" />
+        ) : (
+          getButtonText()
+        )}
       </button>
     </form>
   );
 }
+

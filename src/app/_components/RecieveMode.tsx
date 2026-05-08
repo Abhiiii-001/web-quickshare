@@ -9,10 +9,12 @@ import { downloadFile } from "@/store/slices/fileSlice";
 import { useAppSelector } from "@/store/hooks";
 import { toast } from "react-toastify";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 
 export default function ReceiveMode() {
   const dispatch = useAppDispatch();
   const { isDownloading, downloadUrl } = useAppSelector((state) => state.file);
+  const [isDownloadingFile, setIsDownloadingFile] = useState(false)
 
   const {
     register,
@@ -29,6 +31,7 @@ export default function ReceiveMode() {
   const receiveUsePassword = watch("receiveUsePassword");
 
   const onSubmit = async (data: ReceiveFileData) => {
+    setIsDownloadingFile(true)
     try {
       const url = await dispatch(
         downloadFile({
@@ -45,6 +48,7 @@ export default function ReceiveMode() {
     } catch (error: any) {
       toast.error(error?.message || "Download failed!");
     }
+    setIsDownloadingFile(false)
   };
 
   return (
@@ -58,7 +62,7 @@ export default function ReceiveMode() {
           {...register("receiveCode")}
           placeholder="ABC123"
           maxLength={6}
-          className="w-full bg-white border border-gray-300 rounded-lg px-4 py-5 text-2xl font-mono text-center uppercase tracking-[0.5em] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
+          className="w-full bg-white text-gray-900 placeholder:text-gray-400 border border-gray-300 rounded-lg px-4 py-5 text-2xl font-mono text-center uppercase tracking-[0.5em] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
         />
         {errors.receiveCode && (
           <p className="text-xs text-red-500 mt-1">
@@ -91,18 +95,18 @@ export default function ReceiveMode() {
             type="password"
             {...register("receivePassword")}
             placeholder="Enter password"
-            className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
+            className="w-full bg-white text-gray-900 placeholder:text-gray-400 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
           />
         </div>
       )}
 
       <button
         type="submit"
-        disabled={isDownloading}
+        disabled={isDownloading || isDownloadingFile}
         className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3.5 px-6 rounded-xl uppercase tracking-wider text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:cursor-not-allowed disabled:hover:translate-y-0"
       >
         <Download className="w-4 h-4 inline mr-2" />
-        {isDownloading ? "Downloading..." : "Download"}
+        {isDownloading || isDownloadingFile ? "Downloading..." : "Download"}
       </button>
     </form>
   );

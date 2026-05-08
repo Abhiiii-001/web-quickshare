@@ -11,7 +11,7 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore these paths in the state
-        ignoredActions: ["file/setSelectedFile"],
+        ignoredActions: ["file/setSelectedFile", "file/preUpload"],
         ignoredPaths: ["file.selectedFile"],
       },
     }),

@@ -2,33 +2,77 @@
 @config "../../tailwind.config.ts";
 
 @layer utilities {
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
   .glass-face-front {
-    transform: translateZ(100px);
-    background: linear-gradient(135deg, rgba(255, 159, 122, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    transform: translateZ(110px);
+    background: linear-gradient(135deg, rgba(255, 159, 122, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
   }
   
   .glass-face-back {
-    transform: translateZ(-100px) rotateY(180deg);
-    background: linear-gradient(135deg, rgba(72, 219, 251, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    transform: translateZ(-110px) rotateY(180deg);
+    background: linear-gradient(135deg, rgba(72, 219, 251, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
   }
   
   .glass-face-right {
-    transform: rotateY(90deg) translateZ(100px);
-    background: linear-gradient(135deg, rgba(138, 43, 226, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    transform: rotateY(90deg) translateZ(110px);
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
   }
   
   .glass-face-left {
-    transform: rotateY(-90deg) translateZ(100px);
-    background: linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    transform: rotateY(-90deg) translateZ(110px);
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
   }
   
   .glass-face-top {
-    transform: rotateX(90deg) translateZ(100px);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
+    transform: rotateX(90deg) translateZ(110px);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.05) 100%);
   }
   
   .glass-face-bottom {
-    transform: rotateX(-90deg) translateZ(100px);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.1) 100%);
+    transform: rotateX(-90deg) translateZ(110px);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%);
+  }
+
+  @keyframes rotate-cube {
+    0% { transform: rotateX(0deg) rotateY(0deg); }
+    100% { transform: rotateX(360deg) rotateY(720deg); }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.3); }
+  }
+
+  @keyframes float-icon {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-30px) scale(1.1); }
+  }
+
+  @keyframes float-particle {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-50px) translateX(20px); }
+  }
+
+  .animate-rotate-cube {
+    animation: rotate-cube 40s linear infinite;
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 4s ease-in-out infinite;
+  }
+
+  .animate-float-icon {
+    animation: float-icon 4s ease-in-out infinite;
+  }
+
+  .animate-float-particle {
+    animation: float-particle 6s ease-in-out infinite;
   }
 }

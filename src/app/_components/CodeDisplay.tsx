@@ -1,6 +1,7 @@
 "use client";
 
 import { Copy, Share2, RotateCcw } from "lucide-react";
+import { toast } from "react-toastify";
 
 interface CodeDisplayProps {
   code: string;
@@ -10,6 +11,7 @@ interface CodeDisplayProps {
 export default function CodeDisplay({ code, onReset }: CodeDisplayProps) {
   const copyCode = () => {
     navigator.clipboard.writeText(code);
+    toast.success("Code copied to clipboard! 📋");
   };
 
   const shareCode = async () => {
@@ -28,14 +30,14 @@ export default function CodeDisplay({ code, onReset }: CodeDisplayProps) {
 
   return (
     <div className="text-center space-y-6">
-      <div className="relative bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-300 rounded-2xl p-10 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-300 rounded-2xl p-6 md:p-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-cyan-200/30 to-blue-200/30 animate-pulse" />
 
         <div className="relative z-10">
-          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
+          <p className="text-xs font-bold text-gray-700 uppercase tracking-widest mb-4">
             Your Share Code
           </p>
-          <div className="text-5xl font-bold font-mono tracking-[0.3em] bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent mb-6">
+          <div className="text-4xl md:text-6xl font-black font-mono tracking-[0.1em] md:tracking-[0.3em] text-indigo-600 bg-white/50 backdrop-blur-sm rounded-xl py-6 border border-indigo-100 shadow-inner">
             {code}
           </div>
         </div>

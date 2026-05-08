@@ -11,6 +11,7 @@ export interface FileUploadOptions {
   usePassword: boolean;
   password?: string;
   resourceType?: string;
+  tempPublicId?: string;
 }
 
 export interface UploadUrlResponse {

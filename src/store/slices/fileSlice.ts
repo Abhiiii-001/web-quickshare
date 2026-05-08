@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import fileApiService from "@/services/fileApi";
+import fileApiService, { PreUploadResult } from "@/services/fileApi";
 import {
   FileUploadOptions,
   UploadConfirmResponse,
@@ -18,6 +18,11 @@ interface FileState {
   isDownloading: boolean;
   isFetchingInfo: boolean;
   error: string | null;
+  // Pre-upload (eager upload) state
+  preUploadData: PreUploadResult | null;
+  isPreUploading: boolean;
+  preUploadProgress: number;
+  preUploadError: string | null;
 }
 
 const initialState: FileState = {
@@ -31,22 +36,55 @@ const initialState: FileState = {
   isDownloading: false,
   isFetchingInfo: false,
   error: null,
+  // Pre-upload
+  preUploadData: null,
+  isPreUploading: false,
+  preUploadProgress: 0,
+  preUploadError: null,
 };
 
 // Async thunks
+
+/**
+ * Pre-upload: Eagerly upload file to Cloudinary temp folder on file selection.
+ * This runs steps 1+2 (get signed URL + upload to Cloudinary) in the background.
+ */
+export const preUploadFile = createAsyncThunk(
+  "file/preUpload",
+  async (file: File, { rejectWithValue, dispatch }) => {
+    try {
+      const result = await fileApiService.preUpload(file, (progress) => {
+        dispatch(setPreUploadProgress(progress));
+      });
+      return result;
+    } catch (error) {
+      const apiError = handleApiError(error);
+      return rejectWithValue(apiError.message);
+    }
+  }
+);
+
+/**
+ * Upload file: If pre-upload data exists, only does step 3 (confirm + move).
+ * Otherwise falls back to full 3-step flow.
+ */
 export const uploadFile = createAsyncThunk(
   "file/upload",
   async (
     { file, options }: { file: File; options: FileUploadOptions },
-    { rejectWithValue, dispatch }
+    { rejectWithValue, dispatch, getState }
   ) => {
     try {
+      const state = getState() as { file: FileState };
+      const preUploadData = state.file.preUploadData ?? undefined;
+
       const result = await fileApiService.uploadFile(
         file,
         options,
         (progress) => {
           dispatch(setUploadProgress(progress));
-        }
+        },
+        preUploadData,
       );
       return result;
     } catch (error) {
@@ -97,12 +135,26 @@ const fileSlice = createSlice({
     setUploadProgress: (state, action: PayloadAction<number>) => {
       state.uploadProgress = action.payload;
     },
+    setPreUploadProgress: (state, action: PayloadAction<number>) => {
+      state.preUploadProgress = action.payload;
+    },
+    resetPreUpload: (state) => {
+      state.preUploadData = null;
+      state.isPreUploading = false;
+      state.preUploadProgress = 0;
+      state.preUploadError = null;
+    },
     resetUpload: (state) => {
       state.selectedFile = null;
       state.uploadProgress = 0;
       state.uploadedFileCode = null;
       state.uploadedFileExpiry = null;
       state.error = null;
+      // Also reset pre-upload
+      state.preUploadData = null;
+      state.isPreUploading = false;
+      state.preUploadProgress = 0;
+      state.preUploadError = null;
     },
     resetDownload: (state) => {
       state.fileInfo = null;
@@ -114,7 +166,26 @@ const fileSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Upload file
+    // Pre-upload file (eager upload on file selection)
+    builder
+      .addCase(preUploadFile.pending, (state) => {
+        state.isPreUploading = true;
+        state.preUploadProgress = 0;
+        state.preUploadError = null;
+        state.preUploadData = null;
+      })
+      .addCase(preUploadFile.fulfilled, (state, action) => {
+        state.isPreUploading = false;
+        state.preUploadData = action.payload;
+        state.preUploadProgress = 100;
+      })
+      .addCase(preUploadFile.rejected, (state, action) => {
+        state.isPreUploading = false;
+        state.preUploadError = action.payload as string;
+        state.preUploadProgress = 0;
+      });
+
+    // Upload file (confirm / full flow)
     builder
       .addCase(uploadFile.pending, (state) => {
         state.isUploading = true;
@@ -167,9 +238,12 @@ const fileSlice = createSlice({
 export const {
   setSelectedFile,
   setUploadProgress,
+  setPreUploadProgress,
+  resetPreUpload,
   resetUpload,
   resetDownload,
   clearError,
 } = fileSlice.actions;
 
 export default fileSlice.reducer;
+
