@@ -18,16 +18,23 @@ const shareTechMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "RapidShare | Instant, Secure & Anonymous File Sharing",
+  metadataBase: new URL('https://www.rapidshare.live'),
+  title: "Rapid Share | RapidShare - Instant & Secure File Sharing",
   description:
-    "The fastest way to share files. Upload documents, images, or videos, get a unique 6-digit code, and share it anywhere. No account needed, self-destructing links, and password protection.",
+    "Looking for a rapid share solution? RapidShare is the fastest way to share files online. Upload documents or videos, get a 6-digit code, and rapid share it anywhere anonymously.",
   keywords: [
+    "rapid share",
+    "rapid share files",
+    "RapidShare",
+    "rapidshare live",
+    "quick share",
+    "easy share",
+    "share images",
     "file sharing",
     "instant file transfer",
-    "secure share",
+    "secure rapid share",
     "send large files",
     "anonymous file upload",
-    "RapidShare",
     "file host",
     "zero-knowledge sharing",
     "send files free",
@@ -43,9 +50,9 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    title: "RapidShare | Instant File Sharing",
-    description: "Upload and share files instantly with a simple 6-digit code. Secure, fast, and anonymous.",
-    url: "https://rapidshare.live", 
+    title: "Rapid Share | RapidShare Instant File Sharing",
+    description: "Rapid share your files instantly with a simple 6-digit code. Secure, fast, and anonymous.",
+    url: "https://www.rapidshare.live", 
     siteName: "RapidShare",
     locale: "en_US",
     type: "website",

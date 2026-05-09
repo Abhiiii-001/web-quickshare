@@ -46,7 +46,7 @@ class FileApiService {
   async uploadToCloudinary(
     file: File,
     uploadData: UploadUrlResponse,
-    onProgress?: (progress: number) => void,
+    onProgress?: (_p: number) => void,
   ): Promise<PreUploadResult> {
     const formData = new FormData();
     formData.append("file", file);
@@ -88,7 +88,7 @@ class FileApiService {
    */
   async preUpload(
     file: File,
-    onProgress?: (progress: number) => void,
+    onProgress?: (_p: number) => void,
   ): Promise<PreUploadResult> {
     // Step 1: Get signed upload URL
     onProgress?.(5);
@@ -137,49 +137,45 @@ class FileApiService {
   async uploadFile(
     file: File,
     options: FileUploadOptions,
-    onProgress?: (progress: number) => void,
+    onProgress?: (_p: number) => void,
     preUploadData?: PreUploadResult,
   ): Promise<UploadConfirmResponse> {
-    try {
-      let secureUrl: string;
-      let resourceType: string;
-      let publicId: string;
+    let secureUrl: string;
+    let resourceType: string;
+    let publicId: string;
 
-      if (preUploadData) {
-        // Pre-upload already done — skip steps 1+2
-        secureUrl = preUploadData.secureUrl;
-        resourceType = preUploadData.resourceType;
-        publicId = preUploadData.publicId;
-        onProgress?.(80);
-      } else {
-        // Fallback: full 3-step flow
-        onProgress?.(10);
-        const uploadData = await this.getUploadUrl(
-          file.name,
-          file.type,
-          file.size,
-        );
+    if (preUploadData) {
+      // Pre-upload already done — skip steps 1+2
+      secureUrl = preUploadData.secureUrl;
+      resourceType = preUploadData.resourceType;
+      publicId = preUploadData.publicId;
+      onProgress?.(80);
+    } else {
+      // Fallback: full 3-step flow
+      onProgress?.(10);
+      const uploadData = await this.getUploadUrl(
+        file.name,
+        file.type,
+        file.size,
+      );
 
-        onProgress?.(30);
-        const result = await this.uploadToCloudinary(file, uploadData);
-        secureUrl = result.secureUrl;
-        resourceType = result.resourceType;
-        publicId = result.publicId;
-        onProgress?.(80);
-      }
-
-      // Step 3: Confirm with backend
-      const result = await this.confirmUpload(secureUrl, file, {
-        ...options,
-        resourceType,
-        tempPublicId: publicId,
-      });
-
-      onProgress?.(100);
-      return result;
-    } catch (error) {
-      throw error;
+      onProgress?.(30);
+      const result = await this.uploadToCloudinary(file, uploadData);
+      secureUrl = result.secureUrl;
+      resourceType = result.resourceType;
+      publicId = result.publicId;
+      onProgress?.(80);
     }
+
+    // Step 3: Confirm with backend
+    const result = await this.confirmUpload(secureUrl, file, {
+      ...options,
+      resourceType,
+      tempPublicId: publicId,
+    });
+
+    onProgress?.(100);
+    return result;
   }
 
   /**
@@ -230,4 +226,5 @@ class FileApiService {
   }
 }
 
-export default new FileApiService();
+const fileApiService = new FileApiService();
+export default fileApiService;

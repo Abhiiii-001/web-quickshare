@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import fileApiService, { PreUploadResult } from "@/services/fileApi";
 import {
   FileUploadOptions,
-  UploadConfirmResponse,
   FileInfo,
 } from "@/types/api";
 import { handleApiError } from "@/libs/axios/errorHandler";

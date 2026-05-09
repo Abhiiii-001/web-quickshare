@@ -13,7 +13,7 @@ import { useState } from "react";
 
 export default function ReceiveMode() {
   const dispatch = useAppDispatch();
-  const { isDownloading, downloadUrl } = useAppSelector((state) => state.file);
+  const { isDownloading } = useAppSelector((state) => state.file);
   const [isDownloadingFile, setIsDownloadingFile] = useState(false)
 
   const {

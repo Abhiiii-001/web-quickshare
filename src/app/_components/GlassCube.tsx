@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Image, Video } from 'lucide-react';
+import { FileText, Image as ImageIcon, Video } from 'lucide-react';
 
 export default function GlassCube() {
   return (
@@ -28,7 +28,7 @@ export default function GlassCube() {
           <FileText className="w-10 h-10 text-red-400" />
         </div>
         <div className="absolute top-[65%] right-[10%] animate-float-icon [animation-delay:1.2s] drop-shadow-[0_0_15px_rgba(96,165,250,0.6)]">
-          <Image className="w-10 h-10 text-blue-400" />
+          <ImageIcon className="w-10 h-10 text-blue-400" />
         </div>
         <div className="absolute bottom-[20%] left-[25%] animate-float-icon [animation-delay:2.4s] drop-shadow-[0_0_15px_rgba(192,132,252,0.6)]">
           <Video className="w-10 h-10 text-purple-400" />

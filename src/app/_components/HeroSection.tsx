@@ -13,7 +13,7 @@ export default function HeroSection() {
         </div>
         
         <h1 className="text-6xl font-bold mb-6 text-white leading-tight tracking-wide">
-          Share Files Instantly
+          Rapid Share Files Instantly
         </h1>
         
         <p className="text-xl text-white/85 mb-12 leading-relaxed">

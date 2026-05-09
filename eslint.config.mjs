@@ -1,12 +1,12 @@
 import js from "@eslint/js";
 import next from "eslint-config-next";
 
-export default [
+const eslintConfig = [
   // Base JS rules
   js.configs.recommended,
 
   // Next.js recommended rules
-  next(),
+  ...next,
 
   // Project-specific overrides
   {
@@ -22,6 +22,16 @@ export default [
   },
 
   {
+    languageOptions: {
+      globals: {
+        React: "writable",
+      },
+    },
+  },
+
+  {
     ignores: [".next/**", "dist/**", "node_modules/**"],
   },
 ];
+
+export default eslintConfig;

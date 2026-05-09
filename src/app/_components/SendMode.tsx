@@ -18,18 +18,15 @@ import {
 } from "@/store/slices/fileSlice";
 
 interface SendModeProps {
-  onCodeGenerated: (code: string) => void;
+  onCodeGenerated: (_code: string) => void;
 }
 
 export default function SendMode({ onCodeGenerated }: SendModeProps) {
   const dispatch = useAppDispatch();
   const {
     selectedFile,
-    uploadProgress,
     isUploading,
-    error,
     isPreUploading,
-    preUploadProgress,
     preUploadData,
     preUploadError,
   } = useAppSelector((state) => state.file);
@@ -93,7 +90,7 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
       ).unwrap();
 
       onCodeGenerated(result.code);
-    } catch (error: any) {
+    } catch {
       toast.error("Upload failed!");
     }
   };

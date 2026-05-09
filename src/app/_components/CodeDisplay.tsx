@@ -37,7 +37,7 @@ export default function CodeDisplay({ code, onReset }: CodeDisplayProps) {
           <p className="text-xs font-bold text-gray-700 uppercase tracking-widest mb-4">
             Your Share Code
           </p>
-          <div className="text-4xl md:text-6xl font-black font-mono tracking-[0.1em] md:tracking-[0.3em] text-indigo-600 bg-white/50 backdrop-blur-sm rounded-xl py-6 border border-indigo-100 shadow-inner">
+          <div className="text-4xl font-black font-mono tracking-[0.1em] md:tracking-[0.3em] text-indigo-600 bg-white/50 backdrop-blur-sm rounded-xl py-6 border border-indigo-100 shadow-inner">
             {code}
           </div>
         </div>

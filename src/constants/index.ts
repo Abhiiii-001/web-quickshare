@@ -20,4 +20,4 @@ export const CommonConstants = {
   },
 };
 
-export default {};
+
