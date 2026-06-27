@@ -18,7 +18,7 @@ const shareTechMono = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.rapidshare.live'),
+  metadataBase: new URL("https://www.rapidshare.live"),
   title: "Rapid Share | RapidShare - Instant & Secure File Sharing",
   description:
     "Looking for a rapid share solution? RapidShare is the fastest way to share files online. Upload documents or videos, get a 6-digit code, and rapid share it anywhere anonymously.",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     "zero-knowledge sharing",
     "send files free",
     "private file sharing",
-    "transfer files anonymously"
+    "transfer files anonymously",
   ],
   authors: [{ name: "RapidShare Team" }],
   creator: "RapidShare",
@@ -51,8 +51,9 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Rapid Share | RapidShare Instant File Sharing",
-    description: "Rapid share your files instantly with a simple 6-digit code. Secure, fast, and anonymous.",
-    url: "https://www.rapidshare.live", 
+    description:
+      "Rapid share your files instantly with a simple 6-digit code. Secure, fast, and anonymous.",
+    url: "https://www.rapidshare.live",
     siteName: "RapidShare",
     locale: "en_US",
     type: "website",
@@ -69,9 +70,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
 };
@@ -93,22 +94,28 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebApplication",
-              "name": "RapidShare",
-              "url": "https://rapidshare.live",
-              "description": "Instant, secure and anonymous file sharing platform.",
-              "applicationCategory": "FileShare",
-              "operatingSystem": "All",
-              "offers": {
+              name: "RapidShare",
+              url: "https://rapidshare.live",
+              description:
+                "Instant, secure and anonymous file sharing platform.",
+              applicationCategory: "FileShare",
+              operatingSystem: "All",
+              offers: {
                 "@type": "Offer",
-                "price": "0",
+                price: "0",
               },
-              "author": {
+              author: {
                 "@type": "Person",
-                "name": "Abhishek",
+                name: "Abhishek",
               },
             }),
           }}
         />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5896679560343851"
+          crossorigin="anonymous"
+        ></script>
       </head>
       <body className="font-sans antialiased">
         <ReduxProvider>
