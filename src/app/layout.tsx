@@ -114,7 +114,7 @@ export default function RootLayout({
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5896679560343851"
-          crossorigin="anonymous"
+          crossOrigin="anonymous"
         ></script>
       </head>
       <body className="font-sans antialiased">
