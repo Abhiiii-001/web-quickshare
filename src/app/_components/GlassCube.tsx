@@ -4,7 +4,7 @@ import { FileText, Image as ImageIcon, Video } from 'lucide-react';
 
 export default function GlassCube() {
   return (
-    <div className="hidden md:block w-[400px] h-[500px] mx-auto perspective-[1200px] relative mt-10">
+    <div className="hidden md:block w-[400px] h-[500px] mx-auto perspective-[1200px] relative -mt-10" aria-hidden="true" style={{ contain: 'layout style paint' }}>
       {/* Dynamic Background Glow */}
       <div className="absolute w-[350px] h-[350px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-radial from-indigo-500/40 via-purple-500/10 to-transparent rounded-full blur-[80px] animate-glow-pulse" />
       
@@ -14,7 +14,7 @@ export default function GlassCube() {
       <div className="absolute top-1/2 right-0 w-3 h-3 bg-cyan-400/40 rounded-full blur-[2px] animate-float-icon [animation-delay:0.8s]" />
 
       {/* Cube Container */}
-      <div className="absolute w-[220px] h-[220px] top-1/2 left-1/2 preserve-3d animate-rotate-cube ml-[-110px] mt-[-110px]">
+      <div className="absolute w-[220px] h-[220px] top-1/2 left-1/2 preserve-3d animate-rotate-cube ml-[-110px] mt-[-110px] will-change-transform">
         {/* Cube Faces with enhanced glass effect */}
         <div className="absolute w-[220px] h-[220px] glass-face-front border border-white/30 backdrop-blur-[2px] shadow-[inset_0_0_50px_rgba(255,255,255,0.2),0_15px_50px_rgba(0,0,0,0.3)] rounded-[24px]" />
         <div className="absolute w-[220px] h-[220px] glass-face-back border border-white/30 backdrop-blur-[2px] shadow-[inset_0_0_50px_rgba(255,255,255,0.2),0_15_50px_rgba(0,0,0,0.3)] rounded-[24px]" />

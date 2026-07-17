@@ -1,0 +1,16 @@
+{
+  "name": "RapidShare — Instant File Sharing",
+  "short_name": "RapidShare",
+  "description": "Upload files, get a 6-digit code, and share instantly. No login required.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a0a2e",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

@@ -113,8 +113,9 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
             ? "border-indigo-500 bg-gradient-to-br from-indigo-50 to-cyan-50 scale-[1.02]"
             : "border-gray-300 hover:border-indigo-400"
         }`}
+        aria-label="File upload dropzone"
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps()} id="file-upload-input" aria-label="Upload file" />
         <svg
           className="w-12 h-12 mx-auto mb-4 text-gray-400"
           fill="none"
@@ -172,11 +173,12 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-100 md:text-gray-600 uppercase tracking-wider mb-1.5">
-              <Clock className="w-3 h-3 inline mr-1" />
+            <label htmlFor="expiry-select" className="block text-xs font-semibold text-gray-100 md:text-gray-600 uppercase tracking-wider mb-1.5">
+              <Clock className="w-3 h-3 inline mr-1" aria-hidden="true" />
               Expires
             </label>
             <select
+              id="expiry-select"
               {...register("expiry")}
               defaultValue={CommonConstants.EXPORIED_DURATION_LIST[0].value}
               className="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
@@ -190,11 +192,12 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-100 md:text-gray-600 uppercase tracking-wider mb-1.5">
-              <Hash className="w-3 h-3 inline mr-1" />
+            <label htmlFor="downloads-input" className="block text-xs font-semibold text-gray-100 md:text-gray-600 uppercase tracking-wider mb-1.5">
+              <Hash className="w-3 h-3 inline mr-1" aria-hidden="true" />
               Downloads
             </label>
             <input
+              id="downloads-input"
               type="number"
               {...register("downloads", { valueAsNumber: true })}
               className="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
@@ -205,12 +208,13 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
         </div>
 
         <div className="flex items-center justify-between bg-white border border-gray-300 rounded-lg px-3 py-2.5">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-            <Lock className="w-4 h-4" />
+          <label htmlFor="use-password-toggle" className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
+            <Lock className="w-4 h-4" aria-hidden="true" />
             Password protect
           </label>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
+              id="use-password-toggle"
               type="checkbox"
               {...register("usePassword")}
               className="sr-only peer"
@@ -221,17 +225,20 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
 
         {usePassword && (
           <div>
-            <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">
+            <label htmlFor="password-input" className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">
               Password
             </label>
             <input
+              id="password-input"
               type="password"
               {...register("password")}
               placeholder="Set a password"
               className="w-full bg-white text-gray-900 placeholder:text-gray-400 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
+              aria-describedby={errors.password ? "password-error" : undefined}
+              aria-invalid={!!errors.password}
             />
             {errors.password && (
-              <p className="text-xs text-red-500 mt-1">
+              <p id="password-error" className="text-xs text-red-500 mt-1" role="alert">
                 {errors.password.message}
               </p>
             )}

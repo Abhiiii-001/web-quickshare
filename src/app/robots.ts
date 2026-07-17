@@ -1,12 +1,19 @@
-import { MetadataRoute } from 'next'
- 
+import { MetadataRoute } from "next";
+
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: '/private/',
-    },
-    sitemap: 'https://rapidshare.live/sitemap.xml',
-  }
+    rules: [
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: [
+          "/api/",
+          "/_next/static/",
+          "/_next/image/",
+          "/private/",
+        ],
+      },
+    ],
+    sitemap: "https://www.rapidshare.live/sitemap.xml",
+  };
 }
