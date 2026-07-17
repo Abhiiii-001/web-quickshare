@@ -1,11 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
 import fileReducer from "./slices/fileSlice";
 import uiReducer from "./slices/uiSlice";
+import modalReducer from "./slices/modalSlice";
+import portalReducer from "./slices/portalSlice";
 
 export const store = configureStore({
   reducer: {
     file: fileReducer,
     ui: uiReducer,
+    modal: modalReducer,
+    portal: portalReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

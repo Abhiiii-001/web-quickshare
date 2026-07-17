@@ -10,6 +10,7 @@ import JsonLd, {
   getOrganizationSchema,
   getSoftwareApplicationSchema,
 } from "./_components/JsonLd";
+import GlobalModal from "./_components/modals/GlobalModal";
 
 const shareTech = localFont({
   src: "../../public/fonts/ShareTech-Regular.ttf",
@@ -160,6 +161,7 @@ export default function RootLayout({
 
         <ReduxProvider>
           {children}
+          <GlobalModal />
           <ToastContainer />
         </ReduxProvider>
       </body>
