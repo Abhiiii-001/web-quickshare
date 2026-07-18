@@ -5,6 +5,7 @@ import {
   FileInfo,
 } from "@/types/api";
 import { handleApiError } from "@/libs/axios/errorHandler";
+import { AxiosError } from "axios";
 
 interface FileState {
   selectedFile: File | null;
@@ -13,11 +14,13 @@ interface FileState {
   uploadedFileExpiry: string | null;
   fileInfo: FileInfo | null;
   downloadUrl: string | null;
+  downloadFilename: string | null; // For the direct download flow
   isUploading: boolean;
   isDownloading: boolean;
   isFetchingInfo: boolean;
   error: string | null;
-  // Pre-upload (eager upload) state
+  
+  // @deprecated Eager pre-upload state (for direct-to-bucket flow)
   preUploadData: PreUploadResult | null;
   isPreUploading: boolean;
   preUploadProgress: number;
@@ -31,11 +34,13 @@ const initialState: FileState = {
   uploadedFileExpiry: null,
   fileInfo: null,
   downloadUrl: null,
+  downloadFilename: null,
   isUploading: false,
   isDownloading: false,
   isFetchingInfo: false,
   error: null,
-  // Pre-upload
+  
+  // @deprecated Eager pre-upload state
   preUploadData: null,
   isPreUploading: false,
   preUploadProgress: 0,
@@ -45,6 +50,7 @@ const initialState: FileState = {
 // Async thunks
 
 /**
+ * @deprecated Use uploadFileDirect instead.
  * Pre-upload: Eagerly upload file to Cloudinary temp folder on file selection.
  * This runs steps 1+2 (get signed URL + upload to Cloudinary) in the background.
  */
@@ -64,6 +70,7 @@ export const preUploadFile = createAsyncThunk(
 );
 
 /**
+ * @deprecated Use uploadFileDirect instead.
  * Upload file: If pre-upload data exists, only does step 3 (confirm + move).
  * Otherwise falls back to full 3-step flow.
  */
@@ -93,6 +100,32 @@ export const uploadFile = createAsyncThunk(
   }
 );
 
+/**
+ * New Direct Upload Thunk
+ * Uploads file directly to backend proxy (automatically compresses if beneficial)
+ */
+export const uploadFileDirect = createAsyncThunk(
+  "file/uploadDirect",
+  async (
+    { file, options }: { file: File; options: FileUploadOptions },
+    { rejectWithValue, dispatch }
+  ) => {
+    try {
+      const result = await fileApiService.uploadFileDirect(
+        file,
+        options,
+        (progress) => {
+          dispatch(setUploadProgress(progress));
+        },
+      );
+      return result;
+    } catch (error) {
+      const apiError = handleApiError(error);
+      return rejectWithValue(apiError.message);
+    }
+  }
+);
+
 export const fetchFileInfo = createAsyncThunk(
   "file/fetchInfo",
   async (code: string, { rejectWithValue }) => {
@@ -106,6 +139,9 @@ export const fetchFileInfo = createAsyncThunk(
   }
 );
 
+/**
+ * @deprecated Use downloadFileDirect instead.
+ */
 export const downloadFile = createAsyncThunk(
   "file/download",
   async (
@@ -116,6 +152,37 @@ export const downloadFile = createAsyncThunk(
       const url = await fileApiService.downloadFile(code, password);
       return url;
     } catch (error) {
+      const apiError = handleApiError(error);
+      return rejectWithValue(apiError.message);
+    }
+  }
+);
+
+/**
+ * New Direct Download Thunk
+ * Fetches file from proxy, decompresses if necessary, and returns an Object URL.
+ */
+export const downloadFileDirect = createAsyncThunk(
+  "file/downloadDirect",
+  async (
+    { code, password }: { code: string; password?: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const { blob, filename } = await fileApiService.downloadFileDirect(code, password);
+      const objectUrl = window.URL.createObjectURL(blob);
+      return { objectUrl, filename };
+    } catch (error: any) {
+      // Parse blob error response if Axios failed with blob responseType
+      if (error instanceof AxiosError && error.response?.data instanceof Blob) {
+        try {
+          const text = await error.response.data.text();
+          const parsed = JSON.parse(text);
+          return rejectWithValue(parsed.message || "Download failed");
+        } catch {
+          // ignore
+        }
+      }
       const apiError = handleApiError(error);
       return rejectWithValue(apiError.message);
     }
@@ -157,7 +224,11 @@ const fileSlice = createSlice({
     },
     resetDownload: (state) => {
       state.fileInfo = null;
+      if (state.downloadUrl && state.downloadUrl.startsWith("blob:")) {
+        window.URL.revokeObjectURL(state.downloadUrl);
+      }
       state.downloadUrl = null;
+      state.downloadFilename = null;
       state.error = null;
     },
     clearError: (state) => {
@@ -184,7 +255,7 @@ const fileSlice = createSlice({
         state.preUploadProgress = 0;
       });
 
-    // Upload file (confirm / full flow)
+    // Upload file
     builder
       .addCase(uploadFile.pending, (state) => {
         state.isUploading = true;
@@ -197,6 +268,24 @@ const fileSlice = createSlice({
         state.uploadProgress = 100;
       })
       .addCase(uploadFile.rejected, (state, action) => {
+        state.isUploading = false;
+        state.error = action.payload as string;
+        state.uploadProgress = 0;
+      });
+
+    // Upload file direct
+    builder
+      .addCase(uploadFileDirect.pending, (state) => {
+        state.isUploading = true;
+        state.error = null;
+      })
+      .addCase(uploadFileDirect.fulfilled, (state, action) => {
+        state.isUploading = false;
+        state.uploadedFileCode = action.payload.code;
+        state.uploadedFileExpiry = action.payload.expiresAt;
+        state.uploadProgress = 100;
+      })
+      .addCase(uploadFileDirect.rejected, (state, action) => {
         state.isUploading = false;
         state.error = action.payload as string;
         state.uploadProgress = 0;
@@ -217,7 +306,7 @@ const fileSlice = createSlice({
         state.error = action.payload as string;
       });
 
-    // Download file
+    // Download file (deprecated)
     builder
       .addCase(downloadFile.pending, (state) => {
         state.isDownloading = true;
@@ -228,6 +317,22 @@ const fileSlice = createSlice({
         state.downloadUrl = action.payload;
       })
       .addCase(downloadFile.rejected, (state, action) => {
+        state.isDownloading = false;
+        state.error = action.payload as string;
+      });
+
+    // Download file direct
+    builder
+      .addCase(downloadFileDirect.pending, (state) => {
+        state.isDownloading = true;
+        state.error = null;
+      })
+      .addCase(downloadFileDirect.fulfilled, (state, action) => {
+        state.isDownloading = false;
+        state.downloadUrl = action.payload.objectUrl;
+        state.downloadFilename = action.payload.filename;
+      })
+      .addCase(downloadFileDirect.rejected, (state, action) => {
         state.isDownloading = false;
         state.error = action.payload as string;
       });
@@ -245,4 +350,3 @@ export const {
 } = fileSlice.actions;
 
 export default fileSlice.reducer;
-
