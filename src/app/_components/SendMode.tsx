@@ -20,6 +20,22 @@ interface SendModeProps {
   onCodeGenerated: (_code: string) => void;
 }
 
+const RESTRICTED_EXTENSIONS = [
+  ".exe", ".msi", ".bat", ".cmd", ".sh",
+  ".apk", ".app", ".scr", ".com", ".vbs", ".ps1"
+];
+
+function restrictedFileValidator(file: File) {
+  const extension = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+  if (RESTRICTED_EXTENSIONS.includes(extension)) {
+    return {
+      code: "restricted-file-type",
+      message: `File type ${extension} is not supported for security reasons`,
+    };
+  }
+  return null;
+}
+
 export default function SendMode({ onCodeGenerated }: SendModeProps) {
   const dispatch = useAppDispatch();
   const {
@@ -45,7 +61,14 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
   const usePassword = watch("usePassword");
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: (acceptedFiles) => {
+    validator: restrictedFileValidator,
+    onDrop: (acceptedFiles, fileRejections) => {
+      if (fileRejections.length > 0) {
+        const error = fileRejections[0].errors[0];
+        toast.error(error.message);
+        return;
+      }
+
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
 
