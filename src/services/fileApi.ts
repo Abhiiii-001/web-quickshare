@@ -17,6 +17,7 @@ export interface PreUploadResult {
 
 class FileApiService {
   /**
+   * @deprecated Use uploadFileDirect instead.
    * Step 1: Get signed upload URL from backend
    */
   async getUploadUrl(
@@ -41,6 +42,7 @@ class FileApiService {
   }
 
   /**
+   * @deprecated Use uploadFileDirect instead.
    * Step 2: Upload file directly to Cloudinary
    */
   async uploadToCloudinary(
@@ -83,6 +85,7 @@ class FileApiService {
   }
 
   /**
+   * @deprecated Use uploadFileDirect instead.
    * Pre-upload: Get signed URL + upload to Cloudinary temp folder (Steps 1+2)
    * Called immediately when user selects a file for eager uploading.
    */
@@ -107,6 +110,7 @@ class FileApiService {
   }
 
   /**
+   * @deprecated Use uploadFileDirect instead.
    * Step 3: Confirm upload with backend (move temp → permanent + generate code)
    */
   async confirmUpload(
@@ -132,6 +136,7 @@ class FileApiService {
   }
 
   /**
+   * @deprecated Use uploadFileDirect instead.
    * Complete upload flow (fallback when no pre-upload was done)
    */
   async uploadFile(
@@ -179,6 +184,48 @@ class FileApiService {
   }
 
   /**
+   * Upload file directly to backend proxy (with compression pipeline)
+   */
+  async uploadFileDirect(
+    file: File,
+    options: FileUploadOptions,
+    onProgress?: (progress: number) => void,
+  ): Promise<UploadConfirmResponse> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("expiry", options.expiry);
+    formData.append("downloads", options.downloads.toString());
+    formData.append("usePassword", options.usePassword.toString());
+    if (options.password) {
+      formData.append("password", options.password);
+    }
+
+    const response = await axiosInstance.post<ApiResponse<UploadConfirmResponse>>(
+      "/files/upload-direct",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total,
+            );
+            onProgress?.(percentCompleted);
+          }
+        },
+      },
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.message || "Upload failed");
+    }
+
+    return response.data.data;
+  }
+
+  /**
    * Get file information by code
    */
   async getFileInfo(code: string): Promise<FileInfo> {
@@ -194,6 +241,7 @@ class FileApiService {
   }
 
   /**
+   * @deprecated Use downloadFileDirect instead.
    * Download file
    */
   async downloadFile(code: string, password?: string): Promise<string> {
@@ -210,6 +258,37 @@ class FileApiService {
     }
 
     return response.data.data.url;
+  }
+
+  /**
+   * Download file from backend proxy as a blob (decompressing if necessary)
+   */
+  async downloadFileDirect(
+    code: string,
+    password?: string,
+  ): Promise<{ blob: Blob; filename: string }> {
+    const response = await axiosInstance.post<Blob>(
+      "/files/download",
+      {
+        code,
+        password,
+      },
+      {
+        responseType: "blob",
+      },
+    );
+
+    const contentDisposition = response.headers["content-disposition"];
+    let filename = "download";
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+      if (filenameMatch && filenameMatch[1]) {
+        filename = filenameMatch[1];
+      }
+    }
+
+    const blob = response.data;
+    return { blob, filename };
   }
 
   /**

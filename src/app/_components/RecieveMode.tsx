@@ -5,7 +5,7 @@ import { Download, Lock } from "lucide-react";
 import { receiveFileSchema } from "@/libs/validation";
 import { ReceiveFileData } from "@/types";
 import { useAppDispatch } from "@/store/hooks";
-import { downloadFile } from "@/store/slices/fileSlice";
+import { downloadFileDirect } from "@/store/slices/fileSlice";
 import { useAppSelector } from "@/store/hooks";
 import { toast } from "react-toastify";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +14,7 @@ import { useState } from "react";
 export default function ReceiveMode() {
   const dispatch = useAppDispatch();
   const { isDownloading } = useAppSelector((state) => state.file);
-  const [isDownloadingFile, setIsDownloadingFile] = useState(false)
+  const [isDownloadingFile, setIsDownloadingFile] = useState(false);
 
   const {
     register,
@@ -31,24 +31,30 @@ export default function ReceiveMode() {
   const receiveUsePassword = watch("receiveUsePassword");
 
   const onSubmit = async (data: ReceiveFileData) => {
-    setIsDownloadingFile(true)
+    setIsDownloadingFile(true);
     try {
-      const url = await dispatch(
-        downloadFile({
+      const { objectUrl, filename } = await dispatch(
+        downloadFileDirect({
           code: data.receiveCode,
           password: data.receivePassword,
         }),
       ).unwrap();
 
-      const downloadUrl = url.replace("/upload/", "/upload/fl_attachment/");
-      window.open(downloadUrl, "_self");
+      // Trigger standard browser download using the object URL
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
       toast.success(
-        `Download file for code: ${data.receiveCode.toUpperCase()}`,
+        `Download complete: ${filename}`,
       );
     } catch (error: any) {
       toast.error(error?.message || "Download failed!");
     }
-    setIsDownloadingFile(false)
+    setIsDownloadingFile(false);
   };
 
   return (

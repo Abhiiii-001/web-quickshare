@@ -12,13 +12,28 @@ import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   setSelectedFile,
-  uploadFile,
-  preUploadFile,
-  resetPreUpload,
+  uploadFileDirect,
+  resetUpload,
 } from "@/store/slices/fileSlice";
 
 interface SendModeProps {
   onCodeGenerated: (_code: string) => void;
+}
+
+const RESTRICTED_EXTENSIONS = [
+  ".exe", ".msi", ".bat", ".cmd", ".sh",
+  ".apk", ".app", ".scr", ".com", ".vbs", ".ps1"
+];
+
+function restrictedFileValidator(file: File) {
+  const extension = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+  if (RESTRICTED_EXTENSIONS.includes(extension)) {
+    return {
+      code: "restricted-file-type",
+      message: `File type ${extension} is not supported for security reasons`,
+    };
+  }
+  return null;
 }
 
 export default function SendMode({ onCodeGenerated }: SendModeProps) {
@@ -26,9 +41,7 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
   const {
     selectedFile,
     isUploading,
-    isPreUploading,
-    preUploadData,
-    preUploadError,
+    uploadProgress,
   } = useAppSelector((state) => state.file);
 
   const {
@@ -48,20 +61,24 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
   const usePassword = watch("usePassword");
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: (acceptedFiles) => {
+    validator: restrictedFileValidator,
+    onDrop: (acceptedFiles, fileRejections) => {
+      if (fileRejections.length > 0) {
+        const error = fileRejections[0].errors[0];
+        toast.error(error.message);
+        return;
+      }
+
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
 
-        // Clear previous pre-upload if selecting a different file
+        // Clear previous upload state if selecting a different file
         if (selectedFile) {
-          dispatch(resetPreUpload());
+          dispatch(resetUpload());
         }
 
         dispatch(setSelectedFile(file));
-        toast.success("File selected — uploading in background...");
-
-        // Start eager upload immediately
-        dispatch(preUploadFile(file));
+        toast.success("File selected successfully!");
       }
     },
     maxSize: 100 * 1024 * 1024,
@@ -74,34 +91,23 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
       return;
     }
 
-    if (isPreUploading) {
-      toast.info("File is still uploading, please wait...");
-      return;
-    }
-
-    if (preUploadError) {
-      toast.error("Pre-upload failed. Please re-select your file.");
-      return;
-    }
-
     try {
       const result = await dispatch(
-        uploadFile({ file: selectedFile, options: data })
+        uploadFileDirect({ file: selectedFile, options: data })
       ).unwrap();
 
       onCodeGenerated(result.code);
+      toast.success("File shared successfully!");
     } catch {
       toast.error("Upload failed!");
     }
   };
 
   // Determine submit button state and text
-  const isSubmitDisabled = !selectedFile || isUploading || isPreUploading;
+  const isSubmitDisabled = !selectedFile || isUploading;
   const getButtonText = () => {
-    if (isPreUploading) return "Uploading file...";
-    if (isUploading) return "Generating code...";
-    if (preUploadData) return "Share File ⚡";
-    return "Upload";
+    if (isUploading) return `Uploading (${uploadProgress}%)`;
+    return "Share File ⚡";
   };
 
   return (
@@ -153,17 +159,17 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
                 </p>
               </div>
             </div>
-            {isPreUploading && (
-              <Loader2 className="w-4 h-4 text-indigo-500 animate-spin shrink-0" />
+            {isUploading && (
+              <div className="flex items-center gap-2 shrink-0">
+                <Loader2 className="w-4 h-4 text-indigo-500 animate-spin" />
+              </div>
             )}
           </div>
 
-          {(isPreUploading || preUploadData) && (
-            <div className="w-full bg-black/5 dark:bg-white/5 rounded-full h-1 overflow-hidden">
+          {isUploading && (
+            <div className="w-full bg-black/5 dark:bg-white/5 rounded-full h-1.5 overflow-hidden">
               <div
-                className={`h-full rounded-full ${
-                  preUploadData ? "bg-green-500" : "bg-indigo-500"
-                }`}
+                className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 transition-all duration-300 ease-out"
               />
             </div>
           )}
@@ -249,11 +255,7 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
       <button
         type="submit"
         disabled={isSubmitDisabled}
-        className={`w-full font-black py-4 px-6 rounded-2xl uppercase tracking-[0.2em] text-[10px] shadow-2xl transition-all active:scale-95 disabled:opacity-30 disabled:grayscale ${
-          preUploadData && !isUploading
-            ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-            : "bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
-        }`}
+        className="w-full font-black py-4 px-6 rounded-2xl uppercase tracking-[0.2em] text-[10px] shadow-2xl transition-all active:scale-95 disabled:opacity-30 disabled:grayscale bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
       >
         {isUploading ? (
           <Loader2 className="w-4 h-4 inline mr-2 animate-spin" />
