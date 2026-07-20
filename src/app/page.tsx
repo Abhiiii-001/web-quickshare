@@ -7,7 +7,7 @@ import AdSlot from "./_components/AdSlot";
 
 export default function Home() {
   return (
-    <div className="flex h-[100dvh] w-full overflow-y-auto md:overflow-hidden flex-col bg-[#110524]">
+    <div className="flex h-[100dvh] w-full overflow-y-auto flex-col bg-[#110524]">
       <AuroraBackground />
       <Navbar />
 

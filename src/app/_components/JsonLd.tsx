@@ -38,7 +38,7 @@ export function getWebSiteSchema() {
     name: SITE_NAME,
     url: SITE_URL,
     description:
-      "Instant, secure, and anonymous file sharing. Upload files, get a 6-digit code, and share anywhere.",
+      "A temporary, secure, and account-free file transfer platform. Upload your file, get a 6-digit code, and retrieve it securely anywhere.",
     potentialAction: {
       "@type": "SearchAction",
       target: {
@@ -76,7 +76,7 @@ export function getSoftwareApplicationSchema() {
     name: SITE_NAME,
     url: SITE_URL,
     description:
-      "Instant, secure, and anonymous file sharing platform. Upload documents, images, or videos, get a 6-digit code, and share it anywhere.",
+      "A temporary, secure, and account-free file transfer platform. Upload your file, get a 6-digit code, and retrieve it securely anywhere. Not for permanent cloud storage.",
     applicationCategory: "UtilitiesApplication",
     operatingSystem: "All",
     offers: {

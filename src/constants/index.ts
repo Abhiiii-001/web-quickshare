@@ -18,6 +18,9 @@ export const CommonConstants = {
   PASSWORD_LENGTH: {
     MIN: 6,
   },
+  MAX_FILE_SIZE: 100 * 1024 * 1024, // 100MB
+  MAX_FILE_SIZE_TEXT: "100MB",
+  SUPPORTED_FILE_TYPES_TEXT: "All file types supported",
 };
 
 

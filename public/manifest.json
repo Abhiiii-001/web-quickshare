@@ -1,7 +1,7 @@
 {
-  "name": "RapidShare — Instant File Sharing",
+  "name": "RapidShare — Temporary & Secure File Transfer",
   "short_name": "RapidShare",
-  "description": "Upload files, get a 6-digit code, and share instantly. No login required.",
+  "description": "Upload securely, get a 6-digit code, and retrieve anywhere. No login required.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a0a2e",

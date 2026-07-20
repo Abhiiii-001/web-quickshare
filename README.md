@@ -2,10 +2,10 @@
   <img src="https://img.shields.io/badge/⚡-RapidShare-blueviolet?style=for-the-badge&labelColor=1a0a2e" alt="RapidShare" height="40"/>
 </p>
 
-<h1 align="center">RapidShare — Instant File Sharing</h1>
+<h1 align="center">RapidShare — Temporary & Secure File Transfer</h1>
 
 <p align="center">
-  <strong>Upload. Get a code. Share anywhere. No login required.</strong>
+  <strong>Upload. Get a 6-digit code. Retrieve anywhere. No login required.</strong>
 </p>
 
 <p align="center">
@@ -24,7 +24,7 @@
 
 ## ✨ What is RapidShare?
 
-RapidShare is a **zero-friction file-sharing platform** that generates unique 6-character codes for uploaded files. No accounts, no sign-ups — just upload your file and share the code with anyone.
+RapidShare is a **temporary, secure, account-free file transfer platform** designed for situations where users need to move a file from one device to another without signing into any personal accounts. Unlike permanent cloud storage, it focuses on quick, secure, and ephemeral file delivery.
 
 > 📤 **Send:** Drop a file → Get code `XY7K9P` → Share it  
 > 📥 **Receive:** Enter code `XY7K9P` → Download instantly

@@ -81,7 +81,7 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
         toast.success("File selected successfully!");
       }
     },
-    maxSize: 100 * 1024 * 1024,
+    maxSize: CommonConstants.MAX_FILE_SIZE,
     multiple: false,
   });
 
@@ -138,7 +138,10 @@ export default function SendMode({ onCodeGenerated }: SendModeProps) {
         <p className="text-base font-semibold text-gray-700 mb-2">
           Drop your file here
         </p>
-        <p className="text-sm text-gray-500">or click to browse</p>
+        <p className="text-sm text-gray-500 mb-2">or click to browse</p>
+        <p className="text-xs text-gray-400 font-medium">
+          Up to {CommonConstants.MAX_FILE_SIZE_TEXT} • {CommonConstants.SUPPORTED_FILE_TYPES_TEXT}
+        </p>
       </div>
 
       {selectedFile && (

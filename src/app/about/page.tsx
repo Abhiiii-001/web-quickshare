@@ -9,16 +9,16 @@ import { Github, Linkedin, Mail, ExternalLink, User } from "lucide-react";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "About RapidShare — The Story Behind Instant File Sharing",
+  title: "About RapidShare — Temporary & Secure File Transfer",
   description:
-    "Learn about RapidShare's mission to make file sharing as fast as a text message. Built with cutting-edge cloud infrastructure for maximum speed and security.",
+    "Learn about RapidShare's mission to provide the quickest, safest, and simplest way to temporarily store a file and retrieve it later without an account.",
   alternates: {
     canonical: "https://www.rapidshare.live/about",
   },
   openGraph: {
-    title: "About RapidShare — Instant File Sharing",
+    title: "About RapidShare — Temporary File Transfer",
     description:
-      "Built with a vision to make file sharing fast and secure. Learn more about RapidShare and its creator.",
+      "Built with a vision to make file sharing secure and temporary. Learn more about RapidShare and its creator.",
     url: "https://www.rapidshare.live/about",
     siteName: "RapidShare",
     locale: "en_US",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     title: "About RapidShare",
-    description: "The story behind RapidShare's instant file sharing platform.",
+    description: "The story behind RapidShare's temporary file transfer platform.",
   },
 };
 
@@ -88,12 +88,15 @@ export default function AboutPage() {
                 <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mx-auto md:mx-0" />
               </div>
 
-              <div className="space-y-4 mb-8 text-gray-300 text-lg leading-relaxed">
+              <div className="space-y-4 mb-8 text-gray-300 text-lg leading-relaxed text-left">
                 <p>
-                  RapidShare was built with a singular vision: making file sharing as fast and frictionless as sending a text message.
+                  RapidShare is a <strong className="text-white font-bold">temporary, secure, account-free file transfer platform</strong> designed for situations where users need to move a file from one device to another without signing into any personal accounts.
                 </p>
                 <p>
-                  Created by <strong className="text-white font-bold">Abhishek</strong>, this platform leverages cutting-edge cloud infrastructure to ensure your data moves at the speed of light, without compromising on security or privacy.
+                  Unlike cloud storage services, RapidShare is <strong className="text-white font-bold">not intended for permanent storage</strong>. Its primary purpose is to provide the quickest and safest way to temporarily store a file and retrieve it later. It is built around one simple principle: <em className="text-indigo-300">Temporary file transfer, not permanent cloud storage.</em>
+                </p>
+                <p>
+                  Created by <strong className="text-white font-bold">Abhishek</strong>, this platform leverages AES-256-GCM server-side encryption and smart compression to ensure your files are secure and transfers are fast. Files are automatically deleted, ensuring your data never stays online longer than it needs to.
                 </p>
               </div>
 
@@ -145,6 +148,36 @@ export default function AboutPage() {
           </div>
 
           <AdSlot position="in-content" />
+
+          {/* The Problem We Solve Section */}
+          <section className="mb-16 bg-white/5 backdrop-blur-lg border border-white/10 rounded-[2rem] p-8 md:p-12" aria-labelledby="problem-heading">
+            <h2 id="problem-heading" className="text-3xl font-bold text-white mb-6">The Problem We Solve</h2>
+            <div className="text-gray-300 text-lg leading-relaxed space-y-4">
+              <p>
+                Many people need to transfer files from computers they do not own or do not trust, such as:
+              </p>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 mb-6">
+                <li className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+                  <span className="text-indigo-400">❖</span> Cyber cafés & Library computers
+                </li>
+                <li className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+                  <span className="text-indigo-400">❖</span> College computer labs
+                </li>
+                <li className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+                  <span className="text-indigo-400">❖</span> Office & Hotel business center computers
+                </li>
+                <li className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+                  <span className="text-indigo-400">❖</span> A friend's or family member's device
+                </li>
+              </ul>
+              <p>
+                Existing solutions often require signing into personal accounts, which can leave accounts signed in accidentally, require phone verification on a public device, or leave unnecessary copies of files stored online permanently.
+              </p>
+              <p>
+                RapidShare removes these problems entirely. You simply upload a file, receive a 6-digit retrieval code, and securely download it later from your own device—<strong className="text-white">without ever logging in</strong>.
+              </p>
+            </div>
+          </section>
 
           {/* FAQ Section */}
           <section className="mb-12" aria-labelledby="faq-heading">

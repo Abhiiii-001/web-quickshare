@@ -16,12 +16,12 @@ export default function HeroSection() {
         id="hero-heading"
         className="text-5xl md:text-6xl lg:text-7xl font-bold mb-3 text-white leading-tight tracking-wide drop-shadow-lg"
       >
-        Rapid Share <br className="hidden lg:block" /> Files Instantly
+        Temporary & Secure <br className="hidden lg:block" /> File Transfer
       </h1>
       
       <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl font-medium drop-shadow-md">
-        Upload your file, generate a unique code, and share it anywhere. 
-        Fast, secure, and incredibly simple. Zero tracking.
+        Upload securely, get a simple 6-digit code, and retrieve your file anywhere. 
+        Account-free and disappears automatically.
       </p>
 
       <div className="w-full flex justify-center lg:justify-start" aria-hidden="true">
