@@ -113,7 +113,7 @@ export default function Footer() {
               © {currentYear} RapidShare. All rights reserved.
             </p>
             <p className="text-[10px] text-gray-600">
-              Designed &amp; Developed by Abhishek
+              Designed &amp; Developed by Abhishek & Randheer
             </p>
           </div>
         </div>
